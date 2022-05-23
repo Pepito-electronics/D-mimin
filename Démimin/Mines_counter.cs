@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 namespace démimin
 {
+/* Label qui affiche le nombre de mines restantes */
     public class MinesRemaining : Label
     {
         private int _value;

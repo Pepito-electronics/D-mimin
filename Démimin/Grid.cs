@@ -8,6 +8,10 @@ using System.Windows.Forms;
 
 namespace démimin
 {
+    /* La classe "Incell" est une classe qui hérite de Button
+     * On implémente ici différents attributs qui sont utiles à la disposition et aux nombre de bombes adjacentes
+     * Enfin une méthode propre permet de déterminer les voisins
+     */
     public class Incell : Button
     {
         private int _value = 0;
@@ -19,14 +23,17 @@ namespace démimin
             this._x = x;
             this._y = y;
         }
+
         public int get_value()
         {
             return _value;
         }
+
         public void set_bomb()
         {
             _value = -1;
         }
+
         public void inc_val()
         {
             if (_value >= 0)
@@ -34,8 +41,10 @@ namespace démimin
                 _value++;
             }
         }
+
         public List<(int, int)> get_neighbors(int max_x, int max_y)
         {
+            /* On récupère les coordonnées des cellules qui sont directement adjacentes et on les place dans une liste */
             List<(int, int)> neighbors = new List<(int, int)>();
             for (int i = -1; i <= 1; i++)
             {
@@ -50,6 +59,4 @@ namespace démimin
             return neighbors;
         }
     }
-
-
 }

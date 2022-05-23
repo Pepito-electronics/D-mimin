@@ -181,27 +181,35 @@ namespace démimin
                 timer_flag = true;
                 mytimer.startTimer();
             }
-            my_click_counter.actualise();
-
-
-            reveal_cell(cell, mouse_click); // Appel à la deuxième fonction gestion réelle du click
-
-            /* Condition de victoire
-             * On définit le nombre de cellules devant être révelées comme le nb max - bombes
-             * A chaque nouvelle cellule révelée on décrémente counter --> à 0 victoire
-             */
-            if (counter == 0)
+            if (mytimer._flag)
             {
-                timer_flag = false;
-                mytimer.stopTimer();
-                MessageBox.Show("YOU WIN " + "Score : " + my_click_counter.get_value().ToString());
-                joueur.Send(my_click_counter.get_value());      // envoi du score au serveur
-
-                rebuildGrid(10,10,10);      // Re démarrage
-                //Console.WriteLine(my_click_counter.ToString());
+                mytimer._flag=false;
+                rebuildGrid(10,10,10);
             }
-            //Console.WriteLine(sender.ToString());
-            //MessageBox.Show(string.Join(", ",cell.get_neighbors(max_x,max_y)));
+            else
+            {
+                my_click_counter.actualise();
+
+                reveal_cell(cell, mouse_click); // Appel à la deuxième fonction gestion réelle du click
+
+                /* Condition de victoire
+                 * On définit le nombre de cellules devant être révelées comme le nb max - bombes
+                 * A chaque nouvelle cellule révelée on décrémente counter --> à 0 victoire
+                 */
+                if (counter == 0)
+                {
+                    timer_flag = false;
+                    mytimer.stopTimer();
+                    MessageBox.Show("YOU WIN " + "Score : " + my_click_counter.get_value().ToString());
+                    joueur.Send(my_click_counter.get_value());      // envoi du score au serveur
+
+                    rebuildGrid(10, 10, 10);      // Re démarrage
+                                                  //Console.WriteLine(my_click_counter.ToString());
+                }
+                //Console.WriteLine(sender.ToString());
+                //MessageBox.Show(string.Join(", ",cell.get_neighbors(max_x,max_y)));
+            }
+
         }
 
         private void reveal_cell(Incell cell, MouseEventArgs mouse_click)

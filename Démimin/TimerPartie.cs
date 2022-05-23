@@ -9,8 +9,10 @@ namespace démimin
 {
     public class TimerPartie : Label
     {
+    /* Ici on met à jour un label qui contient le temps d'une partie */
         private int _secondes = 0;
         private int _minutes = 0;
+        public bool _flag;
 
         Timer mytimer = new Timer();
 
@@ -24,13 +26,11 @@ namespace démimin
             mytimer.Interval = 1000;
             //mytimer.Start();
             mytimer.Tick += mytimer_tick;
-
         }
 
         private void mytimer_tick(object sender, EventArgs e)
         {
-            this.actualise();
-
+            this.actualise();           
         }
 
         public void startTimer()
@@ -52,6 +52,7 @@ namespace démimin
         }
         public void actualise()
         {
+        /* Méthode qui actualise le texte du label à chaque tick */
             _secondes += 1;
 
             if (_secondes == 60)
@@ -64,7 +65,7 @@ namespace démimin
             {
                 _minutes = 0;
                 MessageBox.Show("Sorry you lost ... you are too slow");
-                Application.Restart();
+                _flag = true;
             }
             else
             {
