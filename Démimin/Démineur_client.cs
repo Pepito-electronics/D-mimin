@@ -337,19 +337,7 @@ namespace démimin
         private void EasyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             rebuildGrid(10, 10, 10);
-                }
-                buttons.Add(row);
-            }
-            Random rand = new Random();
-            foreach (Incell cell in buttons.SelectMany(x => x).ToList().OrderBy(x => rand.Next()).Take(nb_bombs))
-            {
-                cell.set_bomb();
-                foreach ((int x, int y) in cell.get_neighbors(max_x, max_y))
-                {
-                    buttons[y][x].inc_val();
 
-                }
-            }
         }
 
         private void InterToolStripMenuItem_Click(object sender, EventArgs e)
