@@ -11,24 +11,26 @@ using System.Windows.Forms;
 
 namespace démimin
 {
+    /* Nous sommes ici dans l'application client
+     * Il s'agit d'un démineur classique
+     * A la fin de chaque partie on communique le score au serveur
+     */
     public partial class Démineur_client : Form
     {
+        public Asynch_client joueur;    // Définition d'un objet client asynchrone qui sera associé au client
 
-        public Asynch_client joueur;
-
+        #region Variables programme
         string serverIp;
         int serverPort;
         int max_x = 10;
         int max_y = 10;
         int counter;
         int nb_bombs = 10;
-
         bool timer_flag;
+        #endregion
 
-        //int flag;   
-
-        List<List<Incell>> buttons = new List<List<Incell>>();
-        //ClickCounter my_click_counter = new ClickCounter();         // call  for construtor
+        #region Définition des objets utilisés
+        List<List<Incell>> buttons = new List<List<Incell>>(); // Tableau de jeu contenant tous les boutons du plateau
         ClickCounter my_click_counter;
         Label clicks;
         MinesRemaining mines;
@@ -38,14 +40,14 @@ namespace démimin
         MinesRemaining mineshard;
         Button new_game;
         TimerPartie mytimer = new TimerPartie();
+        #endregion
 
-
+        #region Construteurs
         public Démineur_client()
         {
-
             InitializeComponent();
 
-            /*-------------- création Objects--------------------*/
+            /*-------------- Création Objects--------------------*/
 
             mines = new MinesRemaining(nb_bombs);
             minesremaining= new Label();
@@ -61,38 +63,38 @@ namespace démimin
 
             minesremaining.Text = "Mines";
             minesremaining.Location = new Point(max_x * 39, 65);
+
             my_click_counter.Location = new Point(30, 40);
 
             clicks.Text = "Score";
             clicks.Location = new Point(30, 65);
+
             new_game.Location = new Point(((max_x - 1) * 40 + 90) / 2 - 45, 40);
             new_game.Size = new Size(90, 30);
             new_game.Text = "New Game";
             new_game.Click += newToolStripMenuItem_Click;
 
             mytimer.Location = new Point(((max_x - 1) * 40 + 80) / 2 - 45, 90);
+            /*--------------------------------------------------------*/
 
-            this.Load += new System.EventHandler(this.Joueur_Load);
-
-
-            //button1.Location = new Point(200, 40);
-            //Console.WriteLine(button1.Location.ToString());
-            /*var nomdidju = new Label();
-            nomdidju.Text = "SwaggSweeper";
-            this.Controls.Add(nomdidju);*/
+            this.Load += new System.EventHandler(this.Joueur_Load); // Aussitôt le forms chargé, on déclenche un event qui provoquera la connection au serveur
             this.counter = max_x * max_y - nb_bombs;
             //Console.WriteLine(counter.ToString());
 
-            this.Controls.Add(my_click_counter);                    //place object on forms
+            /* On révèle les objets dans le forms*/
+            this.Controls.Add(my_click_counter);                    
             this.Controls.Add(mines);
             this.Controls.Add(new_game);
             this.Controls.Add(mytimer);
             this.Controls.Add(minesremaining);
             this.Controls.Add(clicks);
+            /*----------------------------------*/
 
-            this.Size = new Size((max_x - 1) * 40 + 105, max_y * 40 + 200);
+            this.Size = new Size((max_x - 1) * 40 + 105, max_y * 40 + 200);     //Dimensionnement de la fenêtre
 
-
+            /* Création du tableau de jeu --> ce sont des boutons issus de la classe Incell
+             * On définit pour chaque nouvelle case la fonction de callback appelée en cas de click
+             */
             for (int y = 0; y < max_y; y++)
             {
                 var row = new List<Incell>();
@@ -106,22 +108,24 @@ namespace démimin
                     row[x].MouseUp += handle_Click;
                     //row[x].R += reveal_cell;
                 }
-                buttons.Add(row);
+                buttons.Add(row); // On peuple ligne par ligne le tableau
             }
+            /* De manière aléatoire on attribue à certaines une bombe*/
             Random rand = new Random();
             foreach (Incell cell in buttons.SelectMany(x => x).ToList().OrderBy(x => rand.Next()).Take(nb_bombs))
             {
                 cell.set_bomb();
+                /* On incrémente ensuite l'attribut de toutes les cases adjacentes */
                 foreach ((int x, int y) in cell.get_neighbors(max_x, max_y))
                 {
                     buttons[y][x].inc_val();
-
                 }
             }
         }
 
         public Démineur_client(string ip, int port) : this() // fait appel au constructeur par défaut avant celui-ci
         {
+            /* Instance du client et abonnement aux évents */ 
             joueur = new Asynch_client();
             joueur.ClientConnected += Joueur_ClientConnected;
             joueur.DataReceived += Joueur_DataReceived;
@@ -130,7 +134,9 @@ namespace démimin
             serverIp = ip;
             serverPort = port;
         }
+        #endregion
 
+        #region Gestion du client
         private void Joueur_ConnectionRefused(Asynch_client client, string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -144,7 +150,7 @@ namespace démimin
 
         private void Joueur_ClientConnected(Asynch_client client)
         {
-
+            Console.WriteLine("Connection sucefull");
         }
         private void Joueur_ClientDisconnected(Asynch_client client, string message)
         {
@@ -152,22 +158,20 @@ namespace démimin
             this.Close();
         }
 
-
-        private void DemineurClose(object sender, FormClosingEventArgs e)
-        {
-            joueur.ClientDisconnected -= Joueur_ClientDisconnected;
-            joueur.Disconnect();
-        }
-
         private void Joueur_Load(object sender, EventArgs e)
         {
             joueur.Connect(serverIp, serverPort);
         }
+        #endregion
 
+        #region Gestion des clicks
+
+        /* Afin de gèrer les clicks deux fonction sont mises en place
+         * Dans la première on récupère l'objet et le type de click
+         * On gère aussi la mise à jour de certaines variables : démarage du Timer et recalcul du nb de mines restantes
+         */
         private void handle_Click(object sender, EventArgs e)
         {
-            // todo: set text
-            //if(e==)
             Incell cell = sender as Incell;
             MouseEventArgs mouse_click = e as MouseEventArgs;
             //Console.WriteLine(cell.BackColor.ToString());
@@ -180,57 +184,65 @@ namespace démimin
             my_click_counter.actualise();
 
 
-            reveal_cell(cell, mouse_click);
+            reveal_cell(cell, mouse_click); // Appel à la deuxième fonction gestion réelle du click
 
+            /* Condition de victoire
+             * On définit le nombre de cellules devant être révelées comme le nb max - bombes
+             * A chaque nouvelle cellule révelée on décrémente counter --> à 0 victoire
+             */
             if (counter == 0)
             {
                 timer_flag = false;
                 mytimer.stopTimer();
                 MessageBox.Show("YOU WIN " + "Score : " + my_click_counter.get_value().ToString());
-                joueur.Send(my_click_counter.get_value());
+                joueur.Send(my_click_counter.get_value());      // envoi du score au serveur
 
-                Application.Restart();
+                rebuildGrid(10,10,10);      // Re démarrage
                 //Console.WriteLine(my_click_counter.ToString());
             }
-
             //Console.WriteLine(sender.ToString());
             //MessageBox.Show(string.Join(", ",cell.get_neighbors(max_x,max_y)));
         }
 
         private void reveal_cell(Incell cell, MouseEventArgs mouse_click)
         {
+        /* On différencie click gauche et click droit
+         * Ensuite on applique la logique
+         */
             if (mouse_click.Button == MouseButtons.Left)
             {
                 switch (cell.get_value())
                 {
-                    case -1:
+                    case -1: //Cas bombe
                         cell.Text = "💣";
                         int score = my_click_counter.get_value();
                         timer_flag = false;
                         mytimer.stopTimer();
                         MessageBox.Show("YOU LOSE " + "score : " + score.ToString());
-                        joueur.Send(my_click_counter.get_value());
-                        rebuildGrid(10,10,10);
+                        int loserScore = 0;
+                        joueur.Send(loserScore);  //envoi du score au serveur --> 0 en cas de perte
+                        //joueur.Send(my_click_counter.get_value());  
+                        rebuildGrid(10,10,10);      // Re démarrage
                         break;
-                    case 0:
+                    case 0: //Cas 0 bombe proche
                         cell.Visible = false;
                         this.counter--;
-                        Console.WriteLine(counter.ToString());
+                        Console.WriteLine(counter.ToString()); //debug
+                        /* On exécute la fonction de manière récursive
+                         * On veut appliquer la fonction à  toutes les cellules adjacentes
+                         */
                         foreach ((int x, int y) in cell.get_neighbors(max_x, max_y))
                         {
-                            if (buttons[y][x].Visible && buttons[y][x].Enabled) reveal_cell(buttons[y][x], mouse_click);
-
+                            if (buttons[y][x].Visible && buttons[y][x].Enabled) reveal_cell(buttons[y][x], mouse_click); // on déclenche un event de click sur toutes les cellule dispo 
                         }
-
                         break;
-                    default:
+                    default: //Cas bombe proche
                         //MessageBox.Show(string.Join(", ", cell.get_neighbors(max_x, max_y)));
                         cell.Enabled = false;
                         this.counter--;
                         Console.WriteLine(counter.ToString());
                         cell.Text = cell.get_value().ToString();
                         break;
-
                 }
             }
 
@@ -262,13 +274,15 @@ namespace démimin
             }
         }
 
-        private void newToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            rebuildGrid(10,10,10);
-        }
+        #endregion
 
-        private void rebuildGrid (int xcells, int ycells, int bombs)
+        #region RE Construction et niveaux
+
+        private void rebuildGrid(int xcells, int ycells, int bombs)
         {
+            /* Fonction de reconstruction de la grille
+             * Afin d'y parvenir on réinitialise les variables et on supprime puis recrée les cases
+             */
             timer_flag = false;
             mytimer.stopTimer();
             max_x = xcells;
@@ -334,10 +348,14 @@ namespace démimin
             }
         }
 
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rebuildGrid(10,10,10);
+        }
+
         private void EasyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             rebuildGrid(10, 10, 10);
-
         }
 
         private void InterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -350,11 +368,11 @@ namespace démimin
             rebuildGrid(30, 16, 99);
         }
 
+        #endregion
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
-
-
     }
 }

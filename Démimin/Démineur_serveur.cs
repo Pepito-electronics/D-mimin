@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 namespace démimin
 {
+/* L'application serveur a pour objectif de fournir au client un identifiant et de récupèrer les meilleures scores */
     public partial class Démineur_serveur : Form
     {
         Asynch_server server;
@@ -17,6 +18,8 @@ namespace démimin
         List<List<string>> player_score = new List<List<string>>();
         int playerCount = 0;
 
+        #region Constructors
+        /* Initialise le forms et démarre le serveur */
         public Démineur_serveur()
         {
             InitializeComponent();
@@ -24,44 +27,58 @@ namespace démimin
 
         public Démineur_serveur(string ip, int port) : this()
         {
+        /* Création et démarrage du serveur + abonnement aux évents */
             server = new Asynch_server(ip, port);
             server.ServerSarted += Server_ServerStarted;
             server.ClientAccepted += Server_ClientAccepted;
             server.Start();
         }
+        #endregion
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+            /* Création des forms client
+             * A ce stade on instancie simplement un deuxième forms et on rend visible
+             */ 
             Démineur_client client = new Démineur_client("127.0.0.1", 1234);
-            
-            client.Show();
-            
+            client.Show();            
         }
         private void Server_ClientAccepted(Asynch_client client)
         {
-            /* Lorse qu'un client se connecte au serveur, on s'abonne au events et on garde une référence dans la liste remoteClients.
-             * Ensuite on met à jour le nombre de clients connectés, on l'affiche dans la listBoxConnectedClients (addClientToListBox)
-             * et on affiche un message dans la zone de monitoring.
+            /* Routine déclenchée à chaque nouvelle connection d'un client au serveur
+             * On récupère les données du client qui sont placée dans un objet client analogue "RemoteClient"
+             * Qui est ensuite placé dans une liste contenant tous les clients
+             * Finalement on crée une nouvelle ligne dans le tableau des scores pour chaque nouveau client
              */
             Asynch_client remoteClient = client;
             remoteClient.DataReceived += RemoteClient_DataReceived;
             remoteClient.ClientDisconnected += RemoteClient_ClientDisconnected;
             remoteClients.Add(client);
             
-            remoteClient.index_client = playerCount;
-            string nomDuJoeur = textBox1.Text;
+            remoteClient.index_client = playerCount;        // On récupère l'index du client et on lui attribue
+            /* Attribution du nom du joueur au client */
+            string nomDuJoeur = textBox1.Text;              
             var player = new List<string>();
             player.Add(nomDuJoeur);
             player_score.Add(player);
             client.Send(nomDuJoeur);
+            /*-----------------------------------------*/
             playerCount++;
         }
 
         private void RemoteClient_DataReceived(Asynch_client client, object data)
         {
+/* Routine déclenchée à la réception de données
+ * Grâce aux méthodes du client analogue on peut utiliser les méthodes d'envoi et de réception propre aux clients
+ * 
+ * On récupère les scores qui sont comparés aux anciens, et on met à jour le tableau des scores si le résultat est meilleur
+ */
             string score = data.ToString();
             int oldscore;
+            /* Lors de la première partie il n'y a pas de score l'idex [x][1] n'existe pas
+             * On essaye donc de récupèrer l'ancien score
+             * Si échec alors il s'agit de la première partie... Debug dans la console pour controler l'erreur
+             */
             try
             {
                 oldscore = int.Parse(player_score[client.index_client][1]);
@@ -71,32 +88,30 @@ namespace démimin
                     player_score[client.index_client][1] = score;
                 }
             }
-            catch(Exception ex)
+            catch(Exception ex) 
             {
                 oldscore = 0;
-                player_score[client.index_client].Add(score);      
+                player_score[client.index_client].Add(score);
+                Console.WriteLine(ex.ToString());
             }
-            //int oldscore = int.Parse(player_score[client.index_client][1]);
-            
-            
-            // player_score[client.index_client].Add(score);
-            //MessageBox.Show(player_score[client.index_client][0]+" : " + player_score[client.index_client][1]);
         }
 
         private void RemoteClient_ClientDisconnected(Asynch_client client, string message)
         {
+        /* Routine de déconnexion - il s'agît de supprimer le client des clients connectés*/
             remoteClients.Remove(client);
         }
 
         private void Server_ServerStarted()
         {
-            //Console.WriteLine("test");
-            MessageBox.Show("Server has sarted");
+        /* Routine de démarrage serveur */
+            Console.WriteLine("Serveur has succefully started");    // Confirmation de démarrage en ligne de commande
+            //MessageBox.Show("Server has sarted");
         }
 
         private void scores_Click(object sender, EventArgs e)
         {
-            
+         /* A l'appui du bouton des scores, on formate une chaine de caractères et on affiche une fenêtre */   
             string scores = "";
             foreach(var client in remoteClients)
             {
