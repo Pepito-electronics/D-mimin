@@ -58,11 +58,11 @@ namespace démimin
 
             /*-------------- Carac Objects--------------------*/
             mines.Location = new Point(max_x * 40, 40);
-            
+
             minesremaining.Text = "Mines";
             minesremaining.Location = new Point(max_x * 39, 65);
             my_click_counter.Location = new Point(30, 40);
-            
+
             clicks.Text = "Score";
             clicks.Location = new Point(30, 65);
             new_game.Location = new Point(((max_x - 1) * 40 + 90) / 2 - 45, 40);
@@ -294,7 +294,7 @@ namespace démimin
 
             this.counter = max_x * max_y - nb_bombs;
 
-            this.Controls.Add(my_click_counter);                    //place object on forms 
+            this.Controls.Add(my_click_counter);                    //place object on forms
             this.Controls.Add(clicks);
             this.Controls.Add(mineseasy);
             this.Controls.Add(minesremaining);
@@ -302,6 +302,10 @@ namespace démimin
 
             this.Controls.Add(menuStrip1);
             this.Controls.Add(mytimer);
+
+            this.Size = new Size((max_x - 1) * 40 + 105, max_y * 40 + 200);
+
+
 
             for (int y = 0; y < max_y; y++)
             {
@@ -333,6 +337,19 @@ namespace démimin
         private void EasyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             rebuildGrid(10, 10, 10);
+                }
+                buttons.Add(row);
+            }
+            Random rand = new Random();
+            foreach (Incell cell in buttons.SelectMany(x => x).ToList().OrderBy(x => rand.Next()).Take(nb_bombs))
+            {
+                cell.set_bomb();
+                foreach ((int x, int y) in cell.get_neighbors(max_x, max_y))
+                {
+                    buttons[y][x].inc_val();
+
+                }
+            }
         }
 
         private void InterToolStripMenuItem_Click(object sender, EventArgs e)
