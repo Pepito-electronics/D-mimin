@@ -16,6 +16,8 @@ namespace démimin
 
         public int index_client = 0;
 
+        private Socket clientSock;
+
         #region EventHandlers
         /* Création des gestionnaires d'évements */
         public delegate void ClientConnectedHandler(Asynch_client client);
@@ -34,8 +36,6 @@ namespace démimin
         public event ClientDisconnectedHandler ClientDisconnected;
         #endregion
 
-        private Socket clientSock;
-
         #region Constructeurs
         /* On définit deux construteurs
          * Ils intancient un objet client de deux manières différentes
@@ -53,6 +53,7 @@ namespace démimin
         }
         #endregion
 
+        #region Fonction client
         public void Connect(string address, int port)
         {
 /* Afin de communiquer, le client doit se connecter à  un serveur
@@ -220,6 +221,8 @@ namespace démimin
                 }
             }
         }
+
+        #endregion
 
         #region routines de connexion
         private void onClientDisconnected(string message)
