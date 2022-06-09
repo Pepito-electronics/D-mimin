@@ -49,7 +49,7 @@ namespace démimin
         public Asynch_client(Socket clientSocket)
         {
             this.clientSock = clientSocket;
-            receiveData();
+            Seceive_data();
         }
         #endregion
 
@@ -63,7 +63,7 @@ namespace démimin
             if (!clientSock.Connected)
             {
                 IPEndPoint EndPoint = new IPEndPoint(IPAddress.Parse(address), port);
-                clientSock.BeginConnect(EndPoint, clientConnectedCallback, null);
+                clientSock.BeginConnect(EndPoint, Connection_Callback, null);
             }
         }
         public void Disconnect()
@@ -75,7 +75,7 @@ namespace démimin
             }
         }
 
-        public void Send(object data)
+        public void Send_data(object data)
         {
 /* Méthode propre à l'envoi de données
  * Les données sont envoyées sous forme de tableau de bits
@@ -96,15 +96,20 @@ namespace démimin
             }
         }
 
-        private void receiveData()
+        private void Seceive_data()
         {
 /* Méthode propre à la réception de données
  * On stock les données reçues dans un buffer temporaire 
  */
             if (clientSock.Connected)
             {
-                ReceiveBuffer receiveBuffer = new ReceiveBuffer();
-                clientSock.BeginReceive(receiveBuffer.tempBuffer, 0, ReceiveBuffer.BufferSize, SocketFlags.None, receiveCallback, receiveBuffer);
+                //R_buff receiveBuffer = new R_buff();
+
+                const int BufferSize = 4096;
+                byte[] tempBuffer = new byte[BufferSize];
+                MemoryStream memStream = new MemoryStream();
+
+                clientSock.BeginReceive(tempBuffer, 0, BufferSize, SocketFlags.None, receiveCallback, tempBuffer);
             }
         }
         private byte[] serialize(object data)
@@ -112,7 +117,7 @@ namespace démimin
 /* La méthode permet la conversion d'un paramètre reçu en argument en un tableau de bits
  * La coversion est réalisée par l'objet "binaryformatter", qui implémente les méthode de conversion
  * L'objet "MemoryStream" permet lui de traiter des données directement dans la mémoire. 
- * Une fois le contenu de data formatté dans un flux temporaire on fige ce flu dans un buffer temporaire
+ * Une fois le contenu de data formatté dans un flux temporaire on fige ce flux dans un buffer temporaire
  * Le flux à pour intérêt l'accès direct à la mémoire, puisque la fonction de formtage sort les bits un à un
  * Et plutôt que d'ajouter chaque bit au buffer, on crée un flux qu'on fige une fois le formatge terminé
 */
@@ -124,7 +129,7 @@ namespace démimin
             return buffer;
         }
 
-        private void clientConnectedCallback(IAsyncResult ar)
+        private void Connection_Callback(IAsyncResult ar)
         {
 /* On tente de se connecter au serveur. Si la connexion est établie, on démarre la réception de 
 * données et on déclenche l'event ClientConnected. 
@@ -140,7 +145,7 @@ namespace démimin
 
             if (clientSock.Connected)
             {
-                receiveData();
+                Seceive_data();
                 onClientConnected(this);
             }
         }
@@ -180,24 +185,38 @@ namespace démimin
                     onClientDisconnected(ex.Message);
                 }
             }
-            ReceiveBuffer receiveBuffer = (ReceiveBuffer)ar.AsyncState;
+            //R_buff receiveBuffer = (R_buff)ar.AsyncState;
+
+            const int BufferSize = 4096;
+            byte[] tempBuffer = (byte[])ar.AsyncState;
+            MemoryStream memStream = new MemoryStream();
 
             if (dataReceivedSize > 0)
             {
-/* Le compteur est uncrémenté après -- ce qui implique que la fonction s'exécute encore une fois après avoir reçu la dernière donnée
- * Lorsqu'on arrive au dernier byte, le socket client devient indisiponible 
- * On décompose alors la donnée reçue et on instancie une variable data dont le type "objet" s'ignifie qu'on ne précise pas le type de donnée
- * Ce dernier est propre à la donnée
- * Enfin il faut relancer l'écoute
- */
-                receiveBuffer.Append(dataReceivedSize);
+                /* Le compteur est uncrémenté après -- ce qui implique que la fonction s'exécute encore une fois après avoir reçu la dernière donnée
+                 * Lorsqu'on arrive au dernier byte, le socket client devient indisiponible 
+                 * On décompose alors la donnée reçue et on instancie une variable data dont le type "objet" s'ignifie qu'on ne précise pas le type de donnée
+                 * Ce dernier est propre à la donnée
+                 * Enfin il faut relancer l'écoute
+                 */
+                //receiveBuffer.Append(dataReceivedSize);
+                memStream.Write(tempBuffer, 0, dataReceivedSize);
                 if (clientSock.Available > 0)
-                    clientSock.BeginReceive(receiveBuffer.tempBuffer, 0, ReceiveBuffer.BufferSize, SocketFlags.None, receiveCallback, receiveBuffer);
+                    clientSock.BeginReceive(tempBuffer, 0, BufferSize, SocketFlags.None, receiveCallback, tempBuffer);
                 else
                 {
-                    object data = receiveBuffer.Deserialize();
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    object data;
+                    memStream.Seek(0, SeekOrigin.Begin);
+
+                    data = formatter.Deserialize(memStream);
+
+                    memStream.Close();
+
+                    //return data;
+                    //object data = receiveBuffer.Deserialize();
                     onDataReceived(data);
-                    receiveData();
+                    Seceive_data();
                 }
             }
         }
@@ -247,7 +266,7 @@ namespace démimin
         #endregion
 
         #region Routines de réception/envoi de dnnées
-/* Sii on souhaite exécuter des tâches après chaque envoi il faut déclencher l'évenement associé
+/* Si on souhaite exécuter des tâches après chaque envoi il faut déclencher l'évenement associé
  */
         private void onDataReceived(object data)
         {

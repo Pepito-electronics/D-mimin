@@ -74,7 +74,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReceiveBuffer.cs" />
+    <Compile Include="R_buff.cs" />
     <EmbeddedResource Include="Démineur_client.resx">
       <DependentUpon>Démineur_client.cs</DependentUpon>
     </EmbeddedResource>

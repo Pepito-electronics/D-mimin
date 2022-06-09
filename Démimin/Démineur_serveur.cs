@@ -61,7 +61,7 @@ namespace démimin
             var player = new List<string>();
             player.Add(nomDuJoeur);
             player_score.Add(player);
-            client.Send(nomDuJoeur);
+            client.Send_data(nomDuJoeur);
             /*-----------------------------------------*/
             playerCount++;
         }

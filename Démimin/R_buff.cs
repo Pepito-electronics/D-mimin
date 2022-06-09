@@ -11,10 +11,10 @@ namespace démimin
  * Il s'agit de construire un buffer capable de récupérer les données transmises lors de la communication client serveur
  * on y  utilise des objets "MemoryStream" qui sont des flux de bits lu directement sur la RAM
  */
-    class ReceiveBuffer
+    class R_buff
     {
-        public const int BufferSize = 4096;
-        public byte[] tempBuffer = new byte[BufferSize];
+        const int BufferSize = 4096;
+        byte[] tempBuffer = new byte[BufferSize];
         private MemoryStream memStream = new MemoryStream();
 
         public void Append(int length)

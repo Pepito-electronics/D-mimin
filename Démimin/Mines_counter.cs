@@ -37,6 +37,11 @@ namespace démimin
             _value++;
             this.Text = _value.ToString();
         }
+        public void reset(int bombs)
+        {
+            this._value = bombs;
+            this.Text = _value.ToString();
+        }
 
     }
 }

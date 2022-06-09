@@ -201,7 +201,7 @@ namespace démimin
                     timer_flag = false;
                     mytimer.stopTimer();
                     MessageBox.Show("YOU WIN " + "Score : " + my_click_counter.get_value().ToString());
-                    joueur.Send(my_click_counter.get_value());      // envoi du score au serveur
+                    joueur.Send_data(my_click_counter.get_value());      // envoi du score au serveur
 
                     rebuildGrid(10, 10, 10);      // Re démarrage
                                                   //Console.WriteLine(my_click_counter.ToString());
@@ -228,7 +228,7 @@ namespace démimin
                         mytimer.stopTimer();
                         MessageBox.Show("YOU LOSE " + "score : " + score.ToString());
                         int loserScore = 0;
-                        joueur.Send(loserScore);  //envoi du score au serveur --> 0 en cas de perte
+                        joueur.Send_data(loserScore);  //envoi du score au serveur --> 0 en cas de perte
                         //joueur.Send(my_click_counter.get_value());  
                         rebuildGrid(10,10,10);      // Re démarrage
                         break;
@@ -311,6 +311,7 @@ namespace démimin
             mytimer.Location = new Point(((max_x - 1) * 40 + 80) / 2 - 45, 90);
 
             my_click_counter.reset();
+            mineseasy.reset(bombs);
 
             /*-------------------------------------------------------*/
 
