@@ -10,15 +10,15 @@ namespace démimin
 {
     public class As_Server
     {
-/* La classe "Asynch_server", permet la création de serveurs
-* Les méthodes qu'elle contient permettent la gestion et la communication avec les cleints
-* Les rôles du serveur sont d'enregistrés les scores des parties et de communiquer avec les clients
-* Les informations échangées sont : le nom des joueurs, le score(nombre de clics), le temps et la difficlté*/
+        /* La classe "As_Server", permet la création de serveurs
+        * Les méthodes qu'elle contient permettent la gestion et la communication avec les cleints
+        * Les rôles du serveur sont d'enregistrés les scores des parties et de communiquer avec les clients
+        * Les informations échangées sont : le nom des joueurs, le score(nombre de clics), le temps et la difficlté*/
 
         Socket listener;        // Déclaration d'un objet socket
         IPEndPoint EndPoint;    // Endroit qui récupère l'appel pour traiter l'info après appel serveur
 
-        public bool Running { get; set; }
+        public bool Running { get; set; }      
         public Socket listenSock { get { return listener; } }
 
         public delegate void ClientAcceptedHandler(As_Client client);

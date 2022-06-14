@@ -14,12 +14,16 @@ namespace démimin
         /* La classe Asynch_client, permet  la création d'objets associés à des clients
         * La classe contient toute les méthodes permettant la communication*/
 
-        public int index_client = 0;
+        public int index_client = 0;        // Variable propre au client, permet leur identification
 
-        private Socket clientSock;
+        private Socket clientSock;          //WebSocket client
 
         #region EventHandlers
+
         /* Création des gestionnaires d'évements */
+        /* Ces objet intègrent des méthodes privées qui permettent la gestion d'évenements spécifiques
+         En pratiquent, l'idée est de détecter l'event en question et déclenché l'appel des callbacks associés puis reset l'état */
+
         public delegate void ClientConnectedHandler(As_Client client);
         public delegate void DataSendHandler(As_Client client);
         public delegate void DataReceiveHandler(As_Client client, object data);
@@ -28,7 +32,8 @@ namespace démimin
         #endregion
 
         #region Events
-        /* Création des events propres à  chaque client */
+        /* Création des events propres à chaque client 
+         ON crée un event dans le pool des events gèrés par chaque handler */
         public event ConnectionRefusedHandler ConnectionRefused;
         public event DataSendHandler DataSent;
         public event DataReceiveHandler DataReceived;
@@ -49,30 +54,21 @@ namespace démimin
         public As_Client(Socket clientSocket)
         {
             this.clientSock = clientSocket;
-            Seceive_data();
+            Receive_data(); //Aussitot le client généré on démare la fonction d'écoute
         }
         #endregion
 
-        #region Fonction client
+        #region Fonctions client
         public void Connect(string address, int port)
         {
 /* Afin de communiquer, le client doit se connecter à  un serveur
  * Il faut alrs préciser l'IP et le port de connection du serveur
- * L'étape finalement de connection du client étant la requête de connection envoyée au serveur.
+ * L'étape finale de connection du client étant la requête de connection envoyée au serveur.
  */
-
             if (!clientSock.Connected)
             {
                 IPEndPoint EndPoint = new IPEndPoint(IPAddress.Parse(address), port);
-                clientSock.BeginConnect(EndPoint, Connection_Callback, null);
-            }
-        }
-        public void Disconnect()
-        {
-/* Déconnection du client au serveur  */
-            if (clientSock.Connected)
-            {
-                clientSock.Close();
+                clientSock.BeginConnect(EndPoint, Connection_Callback, null); // requête de connection, déclenche routine de connection
             }
         }
 
@@ -84,11 +80,11 @@ namespace démimin
  */
             if (clientSock.Connected)
             {
-                byte[] dataBuffer = serialize(data);
+                byte[] dataBuffer = Serialize(data);
 
                 try
                 {
-                    clientSock.BeginSend(dataBuffer, 0, dataBuffer.Length, SocketFlags.None, dataSendCallback, null);
+                    clientSock.BeginSend(dataBuffer, 0, dataBuffer.Length, SocketFlags.None, dataSendCallback, null); // commence l'envoi de data Buffer et démare routine 
                 }
                 catch (Exception ex)
                 {
@@ -97,7 +93,7 @@ namespace démimin
             }
         }
 
-        private void Seceive_data()
+        private void Receive_data()
         {
 /* Méthode propre à la réception de données
  * On stock les données reçues dans un buffer temporaire 
@@ -110,10 +106,10 @@ namespace démimin
                 byte[] tempBuffer = new byte[BufferSize];
                 MemoryStream memStream = new MemoryStream();
 
-                clientSock.BeginReceive(tempBuffer, 0, BufferSize, SocketFlags.None, receiveCallback, tempBuffer);
+                clientSock.BeginReceive(tempBuffer, 0, BufferSize, SocketFlags.None, datRreceivedCallback, tempBuffer);
             }
         }
-        private byte[] serialize(object data)
+        private byte[] Serialize(object data)
         {
 /* La méthode permet la conversion d'un paramètre reçu en argument en un tableau de bits
  * La coversion est réalisée par l'objet "binaryformatter", qui implémente les méthode de conversion
@@ -146,7 +142,7 @@ namespace démimin
 
             if (clientSock.Connected)
             {
-                Seceive_data();
+                Receive_data();
                 onClientConnected(this);
             }
         }
@@ -167,7 +163,7 @@ namespace démimin
             }
         }
 
-        private void receiveCallback(IAsyncResult ar)
+        private void datRreceivedCallback(IAsyncResult ar)
         {
 /* La fonction de callback est appelée lors de la réception de données
  * On récupère la taille de la donnée transmise - nb de bytes
@@ -203,7 +199,7 @@ namespace démimin
                 //receiveBuffer.Append(dataReceivedSize);
                 memStream.Write(tempBuffer, 0, dataReceivedSize);
                 if (clientSock.Available > 0)
-                    clientSock.BeginReceive(tempBuffer, 0, BufferSize, SocketFlags.None, receiveCallback, tempBuffer);
+                    clientSock.BeginReceive(tempBuffer, 0, BufferSize, SocketFlags.None, datRreceivedCallback, tempBuffer);
                 else
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
@@ -217,14 +213,15 @@ namespace démimin
                     //return data;
                     //object data = receiveBuffer.Deserialize();
                     onDataReceived(data);
-                    Seceive_data();
+                    Receive_data();
                 }
             }
         }
 
         #endregion
 
-        #region routines de connexion
+        #region Déclenchement events
+
         private void onClientDisconnected(string message)
         {
             if (ClientDisconnected != null)
@@ -266,11 +263,6 @@ namespace démimin
                 }
             }
         }
-        #endregion
-
-        #region Routines de réception/envoi de dnnées
-/* Si on souhaite exécuter des tâches après chaque envoi il faut déclencher l'évenement associé
- */
         private void onDataReceived(object data)
         {
             if (DataReceived != null)
