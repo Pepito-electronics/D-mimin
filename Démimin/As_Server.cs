@@ -18,8 +18,7 @@ namespace démimin
         Socket listener;        // Déclaration d'un objet socket
         IPEndPoint EndPoint;    // Endroit qui récupère l'appel pour traiter l'info après appel serveur
 
-        public bool Running { get; set; }      
-        public Socket listenSock { get { return listener; } }
+        public bool Running { get; set; }
 
         public delegate void ClientAcceptedHandler(As_Client client);
         public delegate void ServerStatusHandler();
@@ -45,11 +44,6 @@ namespace démimin
             listener.Listen(0);
             acceptClients();
             onServerStarted();
-        }
-        public void Stop()
-        {
-/* Arret du serveur par arrêt de l'écoute des requêtes*/
-            listener.Close();
         }
         private void acceptClients()
         {
