@@ -111,7 +111,7 @@ namespace démimin
             Running = true;
             if (ServerSarted != null)
             {
-                ServerSarted();
+                ServerSarted(); //déclenche event
             }
 
         }
