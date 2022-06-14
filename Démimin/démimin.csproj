@@ -69,7 +69,7 @@
     <Compile Include="Démineur_serveur.Designer.cs">
       <DependentUpon>Démineur_serveur.cs</DependentUpon>
     </Compile>
-    <Compile Include="Grid.cs">
+    <Compile Include="Incell.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Program.cs" />

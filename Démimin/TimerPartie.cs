@@ -14,22 +14,24 @@ namespace démimin
         private int _minutes = 0;
         public bool _flag;
 
-        Timer mytimer = new Timer();
+        Timer mytimer = new Timer(); // création d'un objet timer qui s'incrémente tout les x --> cette durée est déterminée par son attribut interval
 
         public TimerPartie() : base()
         {
+            /* On place le label et on le setup */
             this.Text = "00:00";
             this.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 
             this.BorderStyle = BorderStyle.Fixed3D;
             this.ForeColor = System.Drawing.Color.Blue;
-            mytimer.Interval = 1000;
+            mytimer.Interval = 1000; // on fixe l'interval d'incrémentation du timer --> 1s
             //mytimer.Start();
-            mytimer.Tick += mytimer_tick;
+            mytimer.Tick += mytimer_tick; // a chaque tick routine
         }
 
         private void mytimer_tick(object sender, EventArgs e)
         {
+            /* On actualise le texte du label à chaque tick*/
             this.actualise();           
         }
 
@@ -41,15 +43,13 @@ namespace démimin
         }
         public void stopTimer()
         {
+            /* reset timer */
             mytimer.Stop();
             this._minutes = 0;
             this._secondes = 0;
             this.Text = "00:00";
         }
-        public void reset()
-        {
 
-        }
         public void actualise()
         {
         /* Méthode qui actualise le texte du label à chaque tick */
@@ -57,20 +57,26 @@ namespace démimin
 
             if (_secondes == 60)
             {
+                /* maj des minutes */
                 _secondes = 0;
                 _minutes += 1;
 
             }
             else if (_minutes == 60)
             {
+                /* si partie plus longue que une heure --> perdue */
                 _minutes = 0;
                 MessageBox.Show("Sorry you lost ... you are too slow");
                 _flag = true;
             }
             else
             {
+                /* setup du label a partir du timer */
                 string low_min = "0" + this._minutes.ToString();
                 string low_sec = "0" + this._secondes.ToString();
+
+                // on setup le label pour avoir un format uniforme xx:xx --> si moins de 10 sec alors on ajoute un 0 avant
+                // idem minutes
                 if (this._secondes < 10)
                 {
 

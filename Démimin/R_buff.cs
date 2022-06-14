@@ -7,6 +7,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace démimin
 {
+    //--------------------- CETTE CLASSE N EST PLUS UTILISEE    
+    // Elle est présente dans le projet car utile dans l'optique d'optimiser le code
+
 /* La classe "ReiceiveBuffer" est reprise des ressources disponnibles -- AroundTheWorld
  * Il s'agit de construire un buffer capable de récupérer les données transmises lors de la communication client serveur
  * on y  utilise des objets "MemoryStream" qui sont des flux de bits lu directement sur la RAM

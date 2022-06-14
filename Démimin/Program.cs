@@ -16,7 +16,7 @@ namespace démimin
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Démineur_serveur("127.0.0.1", 1234));
+            Application.Run(new Démineur_serveur("127.0.0.1", 1234)); //run serveur
         }
     }
 }

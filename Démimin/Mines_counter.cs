@@ -29,16 +29,19 @@ namespace démimin
         }
         public void actualise()
         {
+            /* a chaque clic droit dérc le nb de bombes*/
             _value--;
             this.Text = _value.ToString();
         }
         public void clear_flag()
         {
+            /* leve flag quand reclic droit --> alors incr cpt*/
             _value++;
             this.Text = _value.ToString();
         }
         public void reset(int bombs)
         {
+            /* Reset cpt à chaque partie */
             this._value = bombs;
             this.Text = _value.ToString();
         }
