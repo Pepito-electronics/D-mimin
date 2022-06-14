@@ -22,24 +22,30 @@ namespace démimin
         #region Variables programme
         string serverIp;
         int serverPort;
-        int max_x = 10;
+        int max_x = 10;     // définit taille grille
         int max_y = 10;
-        int counter;
+        int counter;        // compteur condition nde victoire
         int nb_bombs = 10;
         bool timer_flag;
         #endregion
 
         #region Définition des objets utilisés
-        List<List<Incell>> buttons = new List<List<Incell>>(); // Tableau de jeu contenant tous les boutons du plateau
-        ClickCounter my_click_counter;
-        Label clicks;
-        MinesRemaining mines;
+        /*Tableau de jeu contenant tous les boutons du plateau*/
+        List<List<Incell>> buttons = new List<List<Incell>>();
+        
+        ClickCounter my_click_counter;  // objet(label perso) compteur de clicks --> score
+        Label clicks;                   // texte indicateur 
+
+        /* Affichage du nb de bombes restantes*/
+        MinesRemaining mines;           
         Label minesremaining;
         MinesRemaining mineseasy;
         MinesRemaining minesinter;
         MinesRemaining mineshard;
+
+
         Button new_game;
-        TimerPartie mytimer = new TimerPartie();
+        TimerPartie mytimer = new TimerPartie();        //timer temps écoulé
         #endregion
 
         #region Construteurs
@@ -78,7 +84,7 @@ namespace démimin
             /*--------------------------------------------------------*/
 
             this.Load += new System.EventHandler(this.Joueur_Load); // Aussitôt le forms chargé, on déclenche un event qui provoquera la connection au serveur
-            this.counter = max_x * max_y - nb_bombs;
+            this.counter = max_x * max_y - nb_bombs;        // nb de clicks av victoire = cell - bombes
             //Console.WriteLine(counter.ToString());
 
             /* On révèle les objets dans le forms*/
@@ -129,7 +135,6 @@ namespace démimin
             joueur = new As_Client();
             joueur.ClientConnected += Joueur_ClientConnected;
             joueur.DataReceived += Joueur_DataReceived;
-            joueur.ClientDisconnected += Joueur_ClientDisconnected;
             joueur.ConnectionRefused += Joueur_ConnectionRefused;
             serverIp = ip;
             serverPort = port;
@@ -152,11 +157,6 @@ namespace démimin
         {
             Console.WriteLine("Connection sucefull");
         }
-        private void Joueur_ClientDisconnected(As_Client client, string message)
-        {
-            MessageBox.Show("You have been disconnected ! Window will now close.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            this.Close();
-        }
 
         private void Joueur_Load(object sender, EventArgs e)
         {
@@ -176,19 +176,22 @@ namespace démimin
             MouseEventArgs mouse_click = e as MouseEventArgs;
             //Console.WriteLine(cell.BackColor.ToString());
 
+            /* Démare ou arrête le timer */
             if (!timer_flag)
             {
+                /* Premier click démare timer*/
                 timer_flag = true;
                 mytimer.startTimer();
             }
             if (mytimer._flag)
             {
+                /* Fin de partie --> reset flag et reconstruit*/
                 mytimer._flag=false;
                 rebuildGrid(10,10,10);
             }
             else
             {
-                my_click_counter.actualise();
+                my_click_counter.actualise();       // inc compteur (score)
 
                 reveal_cell(cell, mouse_click); // Appel à la deuxième fonction gestion réelle du click
 
@@ -198,8 +201,8 @@ namespace démimin
                  */
                 if (counter == 0)
                 {
-                    timer_flag = false;
-                    mytimer.stopTimer();
+                    timer_flag = false; // Reset state --> prochain click démare timer
+                    mytimer.stopTimer(); //dernier click arrête timer
                     MessageBox.Show("YOU WIN " + "Score : " + my_click_counter.get_value().ToString());
                     joueur.Send_data(my_click_counter.get_value());      // envoi du score au serveur
 
@@ -219,13 +222,15 @@ namespace démimin
          */
             if (mouse_click.Button == MouseButtons.Left)
             {
+                /* Détermine logique du jeu
+                 En fonction de l'attribut value de l'objet incell on définit la marche à suivre*/
                 switch (cell.get_value())
                 {
                     case -1: //Cas bombe
                         cell.Text = "💣";
                         int score = my_click_counter.get_value();
                         timer_flag = false;
-                        mytimer.stopTimer();
+                        mytimer.stopTimer();    // stop timer et reset flag 
                         MessageBox.Show("YOU LOSE " + "score : " + score.ToString());
                         int loserScore = 0;
                         joueur.Send_data(loserScore);  //envoi du score au serveur --> 0 en cas de perte
@@ -233,9 +238,16 @@ namespace démimin
                         rebuildGrid(10,10,10);      // Re démarrage
                         break;
                     case 0: //Cas 0 bombe proche
-                        cell.Visible = false;
-                        this.counter--;
+                        //cell.Visible = false;      //fait disparaire la cellule
+
+                        /* Version alternative affiche 0 et changement de couleur */ 
+                        cell.Enabled = false;
+                        cell.BackColor = Color.LightYellow;
+                        cell.Text = cell.get_value().ToString();
+
+                        this.counter--;     //décrémente cpt 
                         Console.WriteLine(counter.ToString()); //debug
+
                         /* On exécute la fonction de manière récursive
                          * On veut appliquer la fonction à  toutes les cellules adjacentes
                          */
@@ -253,7 +265,7 @@ namespace démimin
                         break;
                 }
             }
-
+            /* Click droit*/
             else if (mouse_click.Button == MouseButtons.Right)
             {
                 my_click_counter.clear_flag();
