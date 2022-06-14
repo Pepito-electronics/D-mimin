@@ -17,7 +17,7 @@ namespace démimin
      */
     public partial class Démineur_client : Form
     {
-        public Asynch_client joueur;    // Définition d'un objet client asynchrone qui sera associé au client
+        public As_Client joueur;    // Définition d'un objet client asynchrone qui sera associé au client
 
         #region Variables programme
         string serverIp;
@@ -126,7 +126,7 @@ namespace démimin
         public Démineur_client(string ip, int port) : this() // fait appel au constructeur par défaut avant celui-ci
         {
             /* Instance du client et abonnement aux évents */ 
-            joueur = new Asynch_client();
+            joueur = new As_Client();
             joueur.ClientConnected += Joueur_ClientConnected;
             joueur.DataReceived += Joueur_DataReceived;
             joueur.ClientDisconnected += Joueur_ClientDisconnected;
@@ -137,22 +137,22 @@ namespace démimin
         #endregion
 
         #region Gestion du client
-        private void Joueur_ConnectionRefused(Asynch_client client, string message)
+        private void Joueur_ConnectionRefused(As_Client client, string message)
         {
             MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             this.Close();
         }
 
-        private void Joueur_DataReceived(Asynch_client client, object data)
+        private void Joueur_DataReceived(As_Client client, object data)
         {
             this.Text = data.ToString(); //change le nom de la fenêtre
         }
 
-        private void Joueur_ClientConnected(Asynch_client client)
+        private void Joueur_ClientConnected(As_Client client)
         {
             Console.WriteLine("Connection sucefull");
         }
-        private void Joueur_ClientDisconnected(Asynch_client client, string message)
+        private void Joueur_ClientDisconnected(As_Client client, string message)
         {
             MessageBox.Show("You have been disconnected ! Window will now close.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             this.Close();

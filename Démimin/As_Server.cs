@@ -8,7 +8,7 @@ using System.Net.Sockets;
 
 namespace démimin
 {
-    public class Asynch_server
+    public class As_Server
     {
 /* La classe "Asynch_server", permet la création de serveurs
 * Les méthodes qu'elle contient permettent la gestion et la communication avec les cleints
@@ -21,14 +21,14 @@ namespace démimin
         public bool Running { get; set; }
         public Socket listenSock { get { return listener; } }
 
-        public delegate void ClientAcceptedHandler(Asynch_client client);
+        public delegate void ClientAcceptedHandler(As_Client client);
         public delegate void ServerStatusHandler();
 
         public event ClientAcceptedHandler ClientAccepted;
         public event ServerStatusHandler ServerSarted;
         public event ServerStatusHandler ServerStopped;
 
-        public Asynch_server(string address, int port)
+        public As_Server(string address, int port)
         {
 /* Le constructeur définit le "EndPoint" par son adresse IP et le port de communication*/
             EndPoint = new IPEndPoint(IPAddress.Parse(address), port);
@@ -67,7 +67,7 @@ namespace démimin
             try
             {
                 Socket clientSocket = listener.EndAccept(ar);
-                Asynch_client client = new Asynch_client(clientSocket);
+                As_Client client = new As_Client(clientSocket);
                 onClientAccepted(client);
                 listener.BeginAccept(acceptClientCallback, null);
             }
@@ -76,7 +76,7 @@ namespace démimin
                 onServerStopped();
             }
         }
-        private void onClientAccepted(Asynch_client client)
+        private void onClientAccepted(As_Client client)
         {
 /* Routine de connection de nouveaux clients 
  * Déclenche l'évenement de connection 

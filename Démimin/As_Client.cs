@@ -9,7 +9,7 @@ using System.Text;
 
 namespace démimin
 {
-    public class Asynch_client
+    public class As_Client
     {
         /* La classe Asynch_client, permet  la création d'objets associés à des clients
         * La classe contient toute les méthodes permettant la communication*/
@@ -20,11 +20,11 @@ namespace démimin
 
         #region EventHandlers
         /* Création des gestionnaires d'évements */
-        public delegate void ClientConnectedHandler(Asynch_client client);
-        public delegate void DataSendHandler(Asynch_client client);
-        public delegate void DataReceiveHandler(Asynch_client client, object data);
-        public delegate void ClientDisconnectedHandler(Asynch_client client, string message);
-        public delegate void ConnectionRefusedHandler(Asynch_client client, string message);
+        public delegate void ClientConnectedHandler(As_Client client);
+        public delegate void DataSendHandler(As_Client client);
+        public delegate void DataReceiveHandler(As_Client client, object data);
+        public delegate void ClientDisconnectedHandler(As_Client client, string message);
+        public delegate void ConnectionRefusedHandler(As_Client client, string message);
         #endregion
 
         #region Events
@@ -42,11 +42,11 @@ namespace démimin
          * Soit à partir d'un nouveau socket
          * Soit à partir d'un socket existant
          */
-        public Asynch_client()
+        public As_Client()
         {
             clientSock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
-        public Asynch_client(Socket clientSocket)
+        public As_Client(Socket clientSocket)
         {
             this.clientSock = clientSocket;
             Seceive_data();
@@ -252,7 +252,7 @@ namespace démimin
             }
         }
 
-        private void onClientConnected(Asynch_client asyncClient)
+        private void onClientConnected(As_Client asyncClient)
         {
             if (ClientConnected != null)
             {
@@ -286,7 +286,7 @@ namespace démimin
             }
         }
 
-        private void onDataSent(Asynch_client asyncClient)
+        private void onDataSent(As_Client asyncClient)
         {
             if (DataSent != null)
             {

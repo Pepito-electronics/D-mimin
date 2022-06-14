@@ -46,8 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Asynch_client.cs" />
-    <Compile Include="Asynch_server.cs" />
+    <Compile Include="As_Client.cs" />
+    <Compile Include="As_Server.cs" />
     <Compile Include="TimerPartie.cs">
       <SubType>Component</SubType>
     </Compile>

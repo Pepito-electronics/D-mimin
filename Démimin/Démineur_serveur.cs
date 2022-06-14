@@ -13,8 +13,8 @@ namespace démimin
 /* L'application serveur a pour objectif de fournir au client un identifiant et de récupèrer les meilleures scores */
     public partial class Démineur_serveur : Form
     {
-        Asynch_server server;
-        List<Asynch_client> remoteClients = new List<Asynch_client>();
+        As_Server server;
+        List<As_Client> remoteClients = new List<As_Client>();
         List<List<string>> player_score = new List<List<string>>();
         int playerCount = 0;
 
@@ -28,7 +28,7 @@ namespace démimin
         public Démineur_serveur(string ip, int port) : this()
         {
         /* Création et démarrage du serveur + abonnement aux évents */
-            server = new Asynch_server(ip, port);
+            server = new As_Server(ip, port);
             server.ServerSarted += Server_ServerStarted;
             server.ClientAccepted += Server_ClientAccepted;
             server.Start();
@@ -43,14 +43,14 @@ namespace démimin
             Démineur_client client = new Démineur_client("127.0.0.1", 1234);
             client.Show();            
         }
-        private void Server_ClientAccepted(Asynch_client client)
+        private void Server_ClientAccepted(As_Client client)
         {
             /* Routine déclenchée à chaque nouvelle connection d'un client au serveur
              * On récupère les données du client qui sont placée dans un objet client analogue "RemoteClient"
              * Qui est ensuite placé dans une liste contenant tous les clients
              * Finalement on crée une nouvelle ligne dans le tableau des scores pour chaque nouveau client
              */
-            Asynch_client remoteClient = client;
+            As_Client remoteClient = client;
             remoteClient.DataReceived += RemoteClient_DataReceived;
             remoteClient.ClientDisconnected += RemoteClient_ClientDisconnected;
             remoteClients.Add(client);
@@ -66,7 +66,7 @@ namespace démimin
             playerCount++;
         }
 
-        private void RemoteClient_DataReceived(Asynch_client client, object data)
+        private void RemoteClient_DataReceived(As_Client client, object data)
         {
 /* Routine déclenchée à la réception de données
  * Grâce aux méthodes du client analogue on peut utiliser les méthodes d'envoi et de réception propre aux clients
@@ -96,7 +96,7 @@ namespace démimin
             }
         }
 
-        private void RemoteClient_ClientDisconnected(Asynch_client client, string message)
+        private void RemoteClient_ClientDisconnected(As_Client client, string message)
         {
         /* Routine de déconnexion - il s'agît de supprimer le client des clients connectés*/
             remoteClients.Remove(client);
